@@ -48,9 +48,10 @@ public class CajeroAutomatico {
         CuentaBancaria cuenta = buscar(numeroCuenta);
         validarAntifraude(numeroCuenta, monto);
         validarLimiteDiario(numeroCuenta, monto);
-        cuenta.retirar(monto);
+        cuenta.retirar(monto);        
         repositorio.guardar(numeroCuenta, cuenta);
         avisar(numeroCuenta, "Retiro de $" + monto + ". Saldo: $" + cuenta.getSaldo());
+        
     }
 
     private CuentaBancaria buscar(String numeroCuenta) {
