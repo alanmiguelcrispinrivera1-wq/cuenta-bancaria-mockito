@@ -22,6 +22,7 @@ import java.time.LocalDate;
  *      «Retiro de $<monto>. Saldo: $<saldo>».
  *  C7. Si el SMS falla, el retiro YA se hizo y NO se deshace: el cajero no lanza ninguna excepción.
  *  C8. Si el repositorio no responde (ServicioNoDisponibleException), esa excepción sale tal cual.
+ *
  */
 public class CajeroAutomatico {
 
@@ -46,12 +47,12 @@ public class CajeroAutomatico {
 
     public void retirar(String numeroCuenta, BigDecimal monto) {
         CuentaBancaria cuenta = buscar(numeroCuenta);
-        validarAntifraude(numeroCuenta, monto);
+
+        validarAntifraude(numeroCuenta, monto);   // [Q2 FIX]
         validarLimiteDiario(numeroCuenta, monto);
-        cuenta.retirar(monto);        
-        repositorio.guardar(numeroCuenta, cuenta);
-        avisar(numeroCuenta, "Retiro de $" + monto + ". Saldo: $" + cuenta.getSaldo());
-        
+        cuenta.retirar(monto);
+        repositorio.guardar(numeroCuenta, cuenta);  
+        avisar(numeroCuenta, "Retiro de $" + monto + ". Saldo: $" + cuenta.getSaldo());   // [Q1 FIX]
     }
 
     private CuentaBancaria buscar(String numeroCuenta) {
@@ -64,7 +65,8 @@ public class CajeroAutomatico {
         try {
             sospechosa = antifraude.esSospechosa(numeroCuenta, monto);
         } catch (ServicioNoDisponibleException e) {
-            throw new OperacionRechazadaException("el antifraude no responde");
+            
+             sospechosa = true;   // [Q4 FIX]
         }
         if (sospechosa) {
             throw new OperacionRechazadaException("operación sospechosa");
@@ -74,7 +76,7 @@ public class CajeroAutomatico {
     private void validarLimiteDiario(String numeroCuenta, BigDecimal monto) {
         LocalDate hoy = LocalDate.now(reloj);
         BigDecimal yaRetirado = repositorio.totalRetiradoEn(numeroCuenta, hoy);
-        if (yaRetirado.add(monto).compareTo(LIMITE_DIARIO) > 0) {
+         if (yaRetirado.add(monto).compareTo(LIMITE_DIARIO) > 0) {   // [Q5 FIX]
             throw new LimiteDiarioExcedidoException(yaRetirado, monto, LIMITE_DIARIO);
         }
     }
