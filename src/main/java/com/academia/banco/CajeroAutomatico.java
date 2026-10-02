@@ -48,11 +48,11 @@ public class CajeroAutomatico {
     public void retirar(String numeroCuenta, BigDecimal monto) {
         CuentaBancaria cuenta = buscar(numeroCuenta);
 
-        validarAntifraude(numeroCuenta, monto);   // [Q2 FIX]
+        validarAntifraude(numeroCuenta, monto);   
         validarLimiteDiario(numeroCuenta, monto);
         cuenta.retirar(monto);
         repositorio.guardar(numeroCuenta, cuenta);  
-        avisar(numeroCuenta, "Retiro de $" + monto + ". Saldo: $" + cuenta.getSaldo());   // [Q1 FIX]
+        avisar(numeroCuenta, "Retiro de $" + monto + ". Saldo: $" + cuenta.getSaldo());   
     }
 
     private CuentaBancaria buscar(String numeroCuenta) {
@@ -66,7 +66,7 @@ public class CajeroAutomatico {
             sospechosa = antifraude.esSospechosa(numeroCuenta, monto);
         } catch (ServicioNoDisponibleException e) {
             
-             sospechosa = true;   // [Q4 FIX]
+             sospechosa = true;   
         }
         if (sospechosa) {
             throw new OperacionRechazadaException("operación sospechosa");
@@ -74,9 +74,9 @@ public class CajeroAutomatico {
     }
 
     private void validarLimiteDiario(String numeroCuenta, BigDecimal monto) {
-        LocalDate hoy = LocalDate.now(reloj);
+        LocalDate hoy = LocalDate.now(reloj); 
         BigDecimal yaRetirado = repositorio.totalRetiradoEn(numeroCuenta, hoy);
-         if (yaRetirado.add(monto).compareTo(LIMITE_DIARIO) > 0) {   // [Q5 FIX]
+         if (yaRetirado.add(monto).compareTo(LIMITE_DIARIO) > 0) {   
             throw new LimiteDiarioExcedidoException(yaRetirado, monto, LIMITE_DIARIO);
         }
     }
